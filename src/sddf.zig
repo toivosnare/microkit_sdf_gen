@@ -1073,20 +1073,20 @@ pub const Serial = struct {
         system.connected = true;
     }
 
-    pub fn serialiseConfig(system: *Serial, prefix: []const u8) !void {
+    pub fn serialiseConfig(system: *Serial, dir: fs.Dir) !void {
         if (!system.connected) return Error.NotConnected;
 
         const allocator = system.allocator;
 
         const device_res_data_name = fmt(allocator, "{s}_device_resources", .{system.driver.name});
-        try data.serialize(allocator, system.device_res, prefix, device_res_data_name);
-        try data.serialize(allocator, system.driver_config, prefix, "serial_driver_config");
-        try data.serialize(allocator, system.virt_rx_config, prefix, "serial_virt_rx");
-        try data.serialize(allocator, system.virt_tx_config, prefix, "serial_virt_tx");
+        try data.serialize(allocator, system.device_res, dir, device_res_data_name);
+        try data.serialize(allocator, system.driver_config, dir, "serial_driver_config");
+        try data.serialize(allocator, system.virt_rx_config, dir, "serial_virt_rx");
+        try data.serialize(allocator, system.virt_tx_config, dir, "serial_virt_tx");
 
         for (system.clients.items, 0..) |client, i| {
             const data_name = fmt(allocator, "serial_client_{s}", .{client.name});
-            try data.serialize(allocator, system.client_configs.items[i], prefix, data_name);
+            try data.serialize(allocator, system.client_configs.items[i], dir, data_name);
         }
 
         system.serialised = true;

@@ -1,4 +1,5 @@
 const std = @import("std");
+const fs = std.fs;
 const builtin = @import("builtin");
 const sdf = @import("sdf.zig");
 const Allocator = std.mem.Allocator;
@@ -381,18 +382,22 @@ pub const Resources = struct {
     };
 };
 
-pub fn serialize(allocator: Allocator, s: anytype, prefix: []const u8, path: []const u8) !void {
+pub fn serialize(allocator: Allocator, s: anytype, dir: fs.Dir, path: []const u8) !void {
     const bytes = std.mem.asBytes(&s);
-    const full_path = try std.fs.path.join(allocator, &.{ prefix, path });
-    const full_path_data = try std.fmt.allocPrint(allocator, "{s}.data", .{full_path});
-    const full_path_json = try std.fmt.allocPrint(allocator, "{s}.json", .{full_path});
+    // const full_path = try std.fs.path.join(allocator, &.{ prefix, path });
+    // const full_path_data = try std.fmt.allocPrint(allocator, "{s}.data", .{full_path});
+    // const full_path_json = try std.fmt.allocPrint(allocator, "{s}.json", .{full_path});
+    const path_data = try std.fmt.allocPrint(allocator, "{s}.data", .{path});
+    const path_json = try std.fmt.allocPrint(allocator, "{s}.json", .{path});
 
-    const serialize_file = try std.fs.cwd().createFile(full_path_data, .{});
+    // const serialize_file = try std.fs.cwd().createFile(full_path_data, .{});
+    const serialize_file = try dir.createFile(path_data, .{});
     defer serialize_file.close();
     try serialize_file.writeAll(bytes);
 
     if (emit_json) {
-        const json_file = try std.fs.cwd().createFile(full_path_json, .{});
+        // const json_file = try std.fs.cwd().createFile(full_path_json, .{});
+        const json_file = try dir.createFile(path_json, .{});
         defer json_file.close();
         const writer = json_file.writer();
         try std.json.stringify(s, .{ .whitespace = .indent_4 }, writer);

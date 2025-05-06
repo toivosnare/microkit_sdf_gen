@@ -1,5 +1,7 @@
 const std = @import("std");
 
+pub usingnamespace @import("src/mod.zig");
+
 const test_device_trees = .{
     "qemu_virt_aarch64",
     "odroidc4",
