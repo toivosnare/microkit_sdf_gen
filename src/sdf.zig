@@ -299,6 +299,8 @@ pub const SystemDescription = struct {
 
             if (map.setvar_vaddr) |setvar_vaddr| {
                 try std.fmt.format(writer, " setvar_vaddr=\"{s}\"", .{setvar_vaddr});
+                if (setvar_vaddr[0] == 'd')
+                    try std.fmt.format(writer, " RIKKI ON!!! ", .{});
             }
 
             if (map.cached) |cached| {

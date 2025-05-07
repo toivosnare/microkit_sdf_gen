@@ -77,7 +77,7 @@ libsdfgen.sdfgen_channel_get_pd_b_id.restype = c_uint8
 libsdfgen.sdfgen_channel_get_pd_b_id.argtypes = [c_void_p]
 
 libsdfgen.sdfgen_map_create.restype = c_void_p
-libsdfgen.sdfgen_map_create.argtypes = [c_void_p, c_uint64, MapPermsType, c_bool]
+libsdfgen.sdfgen_map_create.argtypes = [c_void_p, c_uint64, MapPermsType, c_bool, c_char_p]
 libsdfgen.sdfgen_map_destroy.restype = None
 libsdfgen.sdfgen_map_destroy.argtypes = [c_void_p]
 
@@ -558,9 +558,13 @@ class SystemDescription:
             perms: str,
             *,
             cached: bool = True,
+            setvar_vaddr: Optional[str] = None,
         ) -> None:
             c_perms = SystemDescription.Map._perms_to_c_bindings(perms)
-            self._obj = libsdfgen.sdfgen_map_create(mr._obj, vaddr, c_perms, cached)
+            c_setvar_vaddr = c_char_p(0)
+            if setvar_vaddr is not None:
+                c_setvar_vaddr = c_char_p(setvar_vaddr.encode("utf-8"))
+            self._obj = libsdfgen.sdfgen_map_create(mr._obj, vaddr, c_perms, cached, c_setvar_vaddr)
             if self._obj is None:
                 raise Exception("failed to create mapping")
 

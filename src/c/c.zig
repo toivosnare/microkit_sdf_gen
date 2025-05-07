@@ -329,7 +329,7 @@ export fn sdfgen_mr_destroy(c_mr: *align(8) anyopaque) void {
     allocator.destroy(mr);
 }
 
-export fn sdfgen_map_create(c_mr: *align(8) anyopaque, vaddr: u64, c_perms: bindings.sdfgen_map_perms_t, cached: bool) ?*anyopaque {
+export fn sdfgen_map_create(c_mr: *align(8) anyopaque, vaddr: u64, c_perms: bindings.sdfgen_map_perms_t, cached: bool, c_setvar_vaddr: [*c]u8) ?*anyopaque {
     const mr: *Mr = @ptrCast(c_mr);
 
     var perms: Map.Perms = .{};
@@ -342,11 +342,17 @@ export fn sdfgen_map_create(c_mr: *align(8) anyopaque, vaddr: u64, c_perms: bind
     if (c_perms & 0b100 != 0) {
         perms.execute = true;
     }
+    const setvar_vaddr: ?[]const u8 = if (c_setvar_vaddr) |c| std.mem.span(c) else null;
+
+    // if (setvar_vaddr) |x| {
+    //     if (x[0] == 'd')
+    //         return null;
+    // }
 
     const map = allocator.create(Map) catch @panic("OOM");
     // TODO: I think we got some memory problems if we're dereferencing this stuff since
     // we need MemoryRegion to still be valid the whole time since we depend on it
-    map.* = Map.create(mr.*, vaddr, perms, .{ .cached = cached });
+    map.* = Map.create(mr.*, vaddr, perms, .{ .cached = cached, .setvar_vaddr = setvar_vaddr });
 
     return map;
 }
